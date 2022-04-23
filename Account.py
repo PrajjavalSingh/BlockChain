@@ -45,17 +45,18 @@ class Account:
         self._private_pem = self._private_key.private_bytes(encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,encryption_algorithm=serialization.NoEncryption())
         self._public_pem = self._public_key.public_bytes(encoding=serialization.Encoding.PEM,
-                    format=serialization.PublicFormat.SubjectPublicKeyInfo
-)
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo)
+                    
     def create_transaction(self, receiver_id, value, tx_metadata=''):
         nonce = self._nonce + 1
         transaction_message = {'sender': self._id, 'receiver': receiver_id, 'value': value, 'tx_metadata': tx_metadata, 'nonce': nonce}
 
-
-        msg = b'A message for signing'
+        msg = b'You cannot eat your cake and have it too'
         hash = int.from_bytes(hashlib.sha256(msg).digest(), byteorder='big')
-        signature = pow(hash, self._private_key.d, self._private_key.n)
-        #signature = ''
+        signature = self._private_key.sign(msg,padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
+                                                                            salt_length=padding.PSS.MAX_LENGTH),hashes.SHA256())
+
+       #signature = ''
 
         # Implement digital signature of the hash of the message
 
