@@ -70,14 +70,21 @@ class Blockchain:
 
         return True
 
-    def __process_transactions(self, transaction):
+    def __process_transactions(self, transactions):
         # value is to be checked
-        senderbal = self._accounts.get(transaction['message']['sender']).balance()
-        sendamt = self._accounts.get(transaction['message']['value'])
-        if senderbal < sendamt:
-            print("Insufficient balance, Current balance : {bal}"
-                                                        .format(bal=senderbal))
-            return False
+        for index in range(0,len(transactions)):
+            transaction = transactions[index]
+            senderaccnt = self._accounts.get(transaction['message']['sender']) 
+            senderbal = senderaccnt.balance()
+            sendamt = self._accounts.get(transaction['message']['value'])
+            if senderbal < sendamt:
+                print("Insufficient balance, Sender name : {name}\n Current balance : {bal}"
+                                        .format(name=senderaccnt.id(),bal=senderbal))
+                return False
+
+            receiveracnt = self._accounts.get(transaction['message']['receiver'])
+            receiveracnt.increase_balance( sendamt )
+            senderaccnt.decrease_balance( sendamt )
         # Appropriately transfer value from the sender to the receiver
         # For all transactions, first check that the sender has enough balance. 
         # Return False otherwise
@@ -108,16 +115,31 @@ class Blockchain:
     def __validate_chain_hash_integrity(self):
         # Run through the whole blockchain and ensure that previous hash is actually the hash of the previous block
         # Return False otherwise
+        for index in range(1, len(self._chain)):
+            if (self._chain[index].previous_block_hash != self._chain[index - 1].hash_block()):
+                print(f'Previous block hash mismatch in block index: {index}')
+                return False
         return True
 
     def __validate_block_hash_target(self):
         # Run through the whole blockchain and ensure that block hash meets hash target criteria, and is the actual hash of the block
         # Return False otherwise
+        for index in range(1,self._chain):
+            if (int(self._chain[index].hash_block(),16) >= int(self._chain[index].hash_target,16)):
+                print(f'Hash target not achieved in block index: {index}')
+                return False
+                
         return True
 
     def __validate_complete_account_balances(self):
         # Run through the whole blockchain and ensure that balances never become negative from any transaction
         # Return False otherwise
+        for index in range(1, len(self._chain)):
+            block = self._chain[index]
+            transactions = block._transactions
+            if  not self.__process_transactions(transactions):
+                return False
+
         return True
 
     # Blockchain validation function
@@ -126,6 +148,14 @@ class Blockchain:
         # Call __validate_chain_hash_integrity and implement that method. Return False if check fails
         # Call __validate_block_hash_target and implement that method. Return False if check fails
         # Call __validate_complete_account_balances and implement that method. Return False if check fails
+        if not self.__validate_chain_hash_integrity():
+            return False
+        
+        if not self.__validate_block_hash_target():
+            return False
+
+        if not self.__validate_complete_account_balances():
+            return False
 
         return True
 

@@ -13,10 +13,10 @@ class Account:
         self._id = sender_id
         self._balance = balance
         self._nonce = 0
-        self._private_pem   =     None
-        self._public_pem    =     None
-        self.__private_key   =     None
-        self.__public_key    =     None
+        self._private_pem       =     None
+        self._public_pem        =     None
+        self.__private_key      =     None
+        self.__public_key       =     None
         self.__generate_key_pair()
 
     @property
