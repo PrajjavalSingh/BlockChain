@@ -1,3 +1,4 @@
+from email import message
 import json
 import hashlib
 import base64
@@ -69,7 +70,14 @@ class Blockchain:
 
         return True
 
-    def __process_transactions(self, transactions):
+    def __process_transactions(self, transaction):
+        # value is to be checked
+        senderbal = self._accounts.get(transaction['message']['sender']).balance()
+        sendamt = self._accounts.get(transaction['message']['value'])
+        if senderbal < sendamt:
+            print("Insufficient balance, Current balance : {bal}"
+                                                        .format(bal=senderbal))
+            return False
         # Appropriately transfer value from the sender to the receiver
         # For all transactions, first check that the sender has enough balance. 
         # Return False otherwise
