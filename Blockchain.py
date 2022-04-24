@@ -106,7 +106,8 @@ class Blockchain:
     # Simple transaction with just one sender, one receiver, and one value
     # Created by the account and sent to the blockchain instance
     def add_transaction(self, transaction):
-        if self.__validate_transaction(transaction) and self._pending_transactions.append(transaction) :
+        if self.__validate_transaction(transaction):
+            self._pending_transactions.append(transaction)
             return True
         else:
             print(f'ERROR: Transaction: {transaction} failed signature validation')
