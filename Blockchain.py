@@ -6,6 +6,7 @@ import base64
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.exceptions import InvalidSignature
+from Account import Account
 
 from Block import Block
 
@@ -74,17 +75,21 @@ class Blockchain:
         # value is to be checked
         for index in range(0,len(transactions)):
             transaction = transactions[index]
-            senderaccnt = self._accounts.get(transaction['message']['sender']) 
-            senderbal = senderaccnt.balance()
-            sendamt = self._accounts.get(transaction['message']['value'])
-            if senderbal < sendamt:
-                print("Insufficient balance, Sender name : {name}\n Current balance : {bal}"
-                                        .format(name=senderaccnt.id(),bal=senderbal))
-                return False
+            sender = transaction['message']['sender']
+            try:
+                senderaccnt = self._accounts.get(sender)
+                sendamt = transaction['message']['value']
+                senderbal = senderaccnt.balance()
+                if senderbal < sendamt:
+                    print("Insufficient balance, Sender name : {name}\n Current balance : {bal}"
+                                            .format(name=senderaccnt.id(),bal=senderbal))
+                    return False
 
-            receiveracnt = self._accounts.get(transaction['message']['receiver'])
-            receiveracnt.increase_balance( sendamt )
-            senderaccnt.decrease_balance( sendamt )
+                receiveracnt = self._accounts.get(transaction['message']['receiver'])
+                receiveracnt.increase_balance( sendamt )
+                senderaccnt.decrease_balance( sendamt )
+            except:
+                return False
         # Appropriately transfer value from the sender to the receiver
         # For all transactions, first check that the sender has enough balance. 
         # Return False otherwise

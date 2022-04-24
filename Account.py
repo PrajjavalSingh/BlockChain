@@ -51,10 +51,13 @@ class Account:
         transaction_message = {'sender': self._id, 'receiver': receiver_id, 'value': value, 'tx_metadata': tx_metadata, 'nonce': nonce}
         # Implement digital signature of the hash of the message
         private_key = serialization.load_pem_private_key(self._private_pem,password=None)
-        msg = bytes( json.dumps(transaction_message), "utf-8" )
+        message = json.dumps( transaction_message, sort_keys=True )
+        encoded_hash_string = message.encode('utf-8')
+        message_hash = hashlib.sha256(encoded_hash_string).hexdigest()
+        encoded_message_hash = message_hash.encode('utf-8')
         chosen_hash = hashes.SHA256()
         hasher = hashes.Hash(chosen_hash)
-        hasher.update( msg )
+        hasher.update( encoded_message_hash )
         digest = hasher.finalize()
         signature = private_key.sign(digest,padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
                                                 salt_length=padding.PSS.MAX_LENGTH),utils.Prehashed(chosen_hash))
