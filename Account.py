@@ -2,8 +2,9 @@ import hashlib
 import json
 import base64
 
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.asymmetric import rsa, padding, utils
 from cryptography.hazmat.primitives import serialization, hashes
+from hashlib import sha256
 
 class Account:
     # Default balance is 100 if not sent during account creation
@@ -49,10 +50,14 @@ class Account:
         nonce = self._nonce + 1
         transaction_message = {'sender': self._id, 'receiver': receiver_id, 'value': value, 'tx_metadata': tx_metadata, 'nonce': nonce}
         # Implement digital signature of the hash of the message
-        msg = b'You cannot eat your cake and have it too'
         private_key = serialization.load_pem_private_key(self._private_pem,password=None)
-        signature = private_key.sign(msg,padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
-                                                            salt_length=padding.PSS.MAX_LENGTH),hashes.SHA256())
+        msg = bytes( json.dumps(transaction_message), "utf-8" )
+        chosen_hash = hashes.SHA256()
+        hasher = hashes.Hash(chosen_hash)
+        hasher.update( msg )
+        digest = hasher.finalize()
+        signature = private_key.sign(digest,padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
+                                                salt_length=padding.PSS.MAX_LENGTH),utils.Prehashed(chosen_hash))
         signature = base64.b64encode(signature).decode("utf-8")
         self._nonce = nonce
         return {'message': transaction_message, 'signature': signature}
