@@ -54,7 +54,6 @@ class Account:
         signature = private_key.sign(msg,padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
                                                             salt_length=padding.PSS.MAX_LENGTH),hashes.SHA256())
         signature = base64.b64encode(signature).decode("utf-8")
-        print( self._id + "    " + signature)
         self._nonce = nonce
         return {'message': transaction_message, 'signature': signature}
         
