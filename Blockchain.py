@@ -124,7 +124,7 @@ class Blockchain:
     def __validate_block_hash_target(self):
         # Run through the whole blockchain and ensure that block hash meets hash target criteria, and is the actual hash of the block
         # Return False otherwise
-        for index in range(1,self._chain):
+        for index in range(1,len(self._chain)):
             if (int(self._chain[index].hash_block(),16) >= int(self._chain[index].hash_target,16)):
                 print(f'Hash target not achieved in block index: {index}')
                 return False

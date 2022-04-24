@@ -52,10 +52,11 @@ class Account:
         transaction_message = {'sender': self._id, 'receiver': receiver_id, 'value': value, 'tx_metadata': tx_metadata, 'nonce': nonce}
         # Implement digital signature of the hash of the message
         msg = b'You cannot eat your cake and have it too'
-        hash = int.from_bytes(hashlib.sha256(msg).digest(), byteorder='big')
+        #signature = int.from_bytes(hashlib.sha256(msg).digest(), byteorder='big')
         signature = self.__private_key.sign(msg,padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
-                                                                           salt_length=padding.PSS.MAX_LENGTH),hashes.SHA256())
-        #signature = base64.encode()
+                                                            salt_length=padding.PSS.MAX_LENGTH),hashes.SHA256())
+        #signature = hex(signature)
+        signature = base64.b64encode(signature).decode("utf-8")
         self._nonce = nonce
         return {'message': transaction_message, 'signature': signature}
         
