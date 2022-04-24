@@ -76,20 +76,17 @@ class Blockchain:
         for index in range(0,len(transactions)):
             transaction = transactions[index]
             sender = transaction['message']['sender']
-            try:
-                senderaccnt = self._accounts.get(sender)
-                sendamt = transaction['message']['value']
-                senderbal = senderaccnt.balance()
-                if senderbal < sendamt:
-                    print("Insufficient balance, Sender name : {name}\n Current balance : {bal}"
-                                            .format(name=senderaccnt.id(),bal=senderbal))
-                    return False
-
-                receiveracnt = self._accounts.get(transaction['message']['receiver'])
-                receiveracnt.increase_balance( sendamt )
-                senderaccnt.decrease_balance( sendamt )
-            except:
+            senderaccnt = self._accounts.get(sender)
+            sendamt = transaction['message']['value']
+            senderbal = senderaccnt.balance
+            if senderbal < sendamt:
+                print("Insufficient balance, Sender name : {name}\n Current balance : {bal}"
+                                        .format(name=senderaccnt.id,bal=senderbal))
                 return False
+
+            receiveracnt = self._accounts.get(transaction['message']['receiver'])
+            receiveracnt.increase_balance( sendamt )
+            senderaccnt.decrease_balance( sendamt )
         # Appropriately transfer value from the sender to the receiver
         # For all transactions, first check that the sender has enough balance. 
         # Return False otherwise
